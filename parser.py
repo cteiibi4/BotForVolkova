@@ -5,7 +5,7 @@ import time
 import requests
 from bs4 import BeautifulSoup
 
-from common.common import BASE_URL, IMG_FOLDER
+from common.common import BASE_URL
 from common.db_command import start_session, add_category, add_product, add_image, update_status, update_all_status,\
     check_start_category
 
@@ -67,7 +67,6 @@ def parce_category_product(session, cat, Category):
 
 def start_parce(UPDATE):
     session = start_session()
-    check_dir(IMG_FOLDER)
     if UPDATE:
         start_command = None
     else:

@@ -83,6 +83,7 @@ class User(TeleBot):
     name = Column(String)
     phone = Column(String)
     last_product = Column(String)
+    last_message = Column(String)
 
     def __init__(self, path, client_id):
         self.path = path

@@ -1,8 +1,7 @@
 import json
-import re
 
 from .init_db import Category, User, Product, Image
-from .db_command import check_object, add_object
+from .db_command import add_object
 
 
 def get_parent_categorys(session):
@@ -51,64 +50,71 @@ def get_image(session, Product):
     return session.query(Image).filter(Image.product == Product).first()
 
 
-def get_last_state(session, user_id):
-    state = session.query(User).filter(User.user_id == user_id).first()
-    result = json.loads(state.path)
-    # print(result)
+def get_last_state(User):
+    result = json.loads(User.path)
     if len(result) > 1:
         return result[-2]
-    return result[-1]
+    return ['start']
 
 
-def update_last_state(session, user_id, new_state=None):
-    state = session.query(User).filter(User.user_id == user_id).first()
-    path = json.loads(state.path)
+def update_last_state(session, User, new_state=None):
+    path = json.loads(User.path)
     if new_state and new_state not in path:
         path.append(new_state)
     else:
         path.pop()
-    print(path)
-    state.path = json.dumps(path)
+    User.path = json.dumps(path)
     session.commit()
     return path
 
 
-def update_user_phone(session, user_id, phone):
-    user = session.query(User).filter(User.user_id == user_id).first()
-    user.phone = phone
+def update_user_phone(session, User, phone):
+    User.phone = phone
     session.commit()
 
 
-def update_user_name(session, user_id, name):
-    user = session.query(User).filter(User.user_id == user_id).first()
-    user.name = name
+def update_user_name(session, User, name):
+    User.name = name
     session.commit()
 
 
-def check_user_data(session, user_id):
-    user = session.query(User).filter(User.user_id == user_id).first()
-    if user.phone and user.name:
+def check_user_data(User):
+    if User.phone and User.name:
         return True
     return False
 
 
-def create_user_state(session, user_id):
-    user = session.query(User).filter(User.user_id == user_id).first()
-    if not user:
-        client_path = User(json.dumps(['start']), user_id)
-        add_object(session, client_path)
-    else:
-        user.path = json.dumps(['start'])
+def create_user_state(session, User):
+    User.path = json.dumps(['start'])
     session.commit()
 
 
-def get_user_answer(session, user_id):
-    user = check_object(session, User, user_id=user_id)
-    if user.last_product == 'want_in_command':
-        return f'Спасибо {user.name}, в ближайшее время с вами свяжутся'
-    return f'Спасибо {user.name},в ближайшее время с вами свяжутся для обсуждения деталей заказа'
+def get_user_answer(User):
+    if User.last_product == 'want_in_command':
+        return f'Спасибо {User.name}, в ближайшее время с вами свяжутся'
+    return f'Спасибо {User.name},в ближайшее время с вами свяжутся для обсуждения деталей заказа'
 
 
-def update_last_product(session, user_id, last_product):
+def update_last_product(User, last_product):
+    User.last_product = last_product
+
+
+def set_last_message(session, User, message_id):
+    User.last_message = message_id
+    session.commit()
+
+
+def get_last_message(User):
+    if User.last_message:
+        return User.last_message
+
+
+def get_user(session, user_id):
     user = session.query(User).filter(User.user_id == user_id).first()
-    user.last_product = last_product
+    if not user:
+        user = User(json.dumps(['start']), user_id)
+        add_object(session, user)
+    session.commit()
+    return user
+
+
