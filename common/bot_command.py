@@ -1,4 +1,5 @@
 import json
+import re
 
 from .init_db import Category, User, Product, Image
 from .db_command import add_object
@@ -118,3 +119,7 @@ def get_user(session, user_id):
     return user
 
 
+def check_buy_product(command):
+    if command.split(':')[0] == 'buy':
+        return True
+    return False

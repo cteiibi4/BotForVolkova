@@ -1,6 +1,6 @@
 import smtplib
 from .init_db import Product
-from config import HOST, USERNAME, PASSWORD, FROM, TO
+from config import HOST, USERNAME, PASSWORD, TO
 
 
 def send_email(session, User):
@@ -10,9 +10,9 @@ def send_email(session, User):
     else:
         product = session.query(Product).filter(Product.command == User.last_product).first()
         subject = f'{User.name} хочет в купить товар {product.name}'
-        body = f'{User.name}, хочет заказать товар {product.name} № {product.command}. \n Телефон:{User.phone}'
+        body = f'{User.name}, хочет заказать товар {product.name}. \n Телефон:{User.phone}'
     msg = "\r\n".join((
-        "From: %s" % FROM,
+        "From: %s" % USERNAME,
         "To: %s" % TO,
         "Subject: %s" % subject,
         "",
@@ -20,6 +20,6 @@ def send_email(session, User):
     ))
     server = smtplib.SMTP_SSL(HOST, 465)
     server.login(USERNAME, PASSWORD)
-    server.sendmail(FROM, [TO], msg.encode('utf-8'))
+    server.sendmail(USERNAME, [TO], msg.encode('utf-8'))
     server.quit()
     return True

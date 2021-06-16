@@ -14,6 +14,7 @@ COMMANDS = {'about_company': {
         'father': 'about_company',
         'name': 'Коротко за 6 минут',
         'text': '6 минут',
+        'video': 'https://www.youtube.com/watch?v=it87JRX9qmY',
         'commands': ['want_in_command'],
     },
     'plan': {
