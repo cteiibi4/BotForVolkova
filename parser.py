@@ -38,7 +38,7 @@ def parse_link(session, elem, parent):
         return add_category(session, name, command, description, parent)
 
 
-def parce_category_product(session, cat, Category):
+def parce_category_product(session, cat, Category, update):
     link = cat.find('a')['href']
     response_cat = take_data_get(BASE_URL + link)
     cat_soup = BeautifulSoup(response_cat.text, 'lxml')
@@ -58,16 +58,16 @@ def parce_category_product(session, cat, Category):
             print(AttributeError)
             raise AttributeError
         print(f'Сканируем товар {command} ({name})')
-        product = add_product(session, name, description, command, None, Category, UPDATE)
+        product = add_product(session, name, description, command, None, Category, update)
         short_image_url = product_soup.find(class_='productInfoImage__preview-image')
         if short_image_url:
             image_url = "https:" + short_image_url['data-big']
             add_image(session, product, image_url)
 
 
-def start_parce(UPDATE):
+def start_parce(update):
     session = start_session()
-    if UPDATE:
+    if update:
         start_command = None
     else:
         start_command = check_start_category(session)
@@ -78,12 +78,12 @@ def start_parce(UPDATE):
         parent_category = parse_link(session, parent, None)
         sub_cat = parent.find_all('li')
         if not sub_cat and parent_category:
-            parce_category_product(session, parent, parent_category)
+            parce_category_product(session, parent, parent_category, update)
         for cat in sub_cat:
             if start_command is None or parent_category.command == start_command or cat.find('a')['href'].split('/')[-2] == start_command:
                 start_command = None
                 sub_category = parse_link(session, cat, parent_category)
-                parce_category_product(session, cat, sub_category)
+                parce_category_product(session, cat, sub_category, update)
                 update_status(sub_category, True)
                 session.commit()
             if parent_category is not None:

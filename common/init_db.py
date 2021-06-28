@@ -45,7 +45,6 @@ class Category(TeleBot):
     name = Column(String, unique=True)
     command = Column(String, unique=True, primary_key=True)
     description = Column(String)
-    # parent_category_name = Column(String, ForeignKey('category.name'))
     products = relationship('Product',
                             secondary=menu_table,
                             back_populates='category')

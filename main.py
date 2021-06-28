@@ -1,5 +1,8 @@
+import time
+import asyncio
 from aiogram import Bot, Dispatcher, executor, types
 
+from parser import start_parce
 from common.common import COMMANDS
 from common.db_command import start_session
 from common.send_email import send_email
@@ -216,6 +219,23 @@ async def show_products_command(callback_query: types.CallbackQuery):
     await bot.delete_message(user.user_id, last_msg)
 
 
+async def parce():
+    update = False
+    while True:
+        start_parce(update)
+        time.sleep(604800)
+        update = True
+
+
+async def start_bot():
+    executor.start_polling(dp)
+
+
 if __name__ == "__main__":
     session = start_session()
-    executor.start_polling(dp)
+    ioloop = asyncio.get_event_loop()
+    tasks = [ioloop.create_task(parce()), ioloop.create_task(start_bot())]
+    wait_tasks = asyncio.wait(tasks)
+    ioloop.run_until_complete(wait_tasks)
+
+
