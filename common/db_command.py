@@ -57,8 +57,10 @@ def add_product(session, name, description, command, cost, Category, update):
         return new_product
     else:
         if update:
-            check.update({Product.name: name, Product.description: description,
-                          Product.command: command, Product.cost: cost})
+            check.name = name
+            check.description = description
+            check.command = command
+            check.cost = cost
         check.category.append(Category)
         return check
 

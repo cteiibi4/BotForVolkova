@@ -12,7 +12,7 @@ from common.bot_command import get_parent_categorys, check_category, get_categor
     get_last_message, check_buy_product
 
 from common.check_data import check_phone, check_name
-from config import TOKEN
+from config import TOKEN, SUPERUSERS
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
@@ -42,6 +42,23 @@ async def set_default_commands(dp):
     await dp.bot.set_my_commands([
         types.BotCommand("start", "Запустить бота")])
 
+
+@dp.message_handler(commands=['create_db', 'update_db'])
+async def update_db_command(message: types.Message):
+    message_id = message["message_id"]
+    user = get_user(session, message['from']['id'])
+    if message.from_user.username in SUPERUSERS:
+        if message.text == '/create_db':
+            message_new = await bot.send_message(chat_id=user.user_id, text="Создаем базу")
+            await bot.delete_message(user.user_id, message_id)
+            await asyncio.create_task(create_db(False))
+        else:
+            message_new = await bot.send_message(chat_id=user.user_id, text="Обновляем базу")
+            await bot.delete_message(user.user_id, message_id)
+            await asyncio.create_task(create_db(True))
+        await bot.delete_message(user.user_id, message_new["message_id"])
+    else:
+        await bot.delete_message(user.user_id, message_id)
 
 @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
@@ -227,24 +244,18 @@ async def show_products_command(callback_query: types.CallbackQuery):
     await bot.delete_message(user.user_id, last_msg)
 
 
-async def parce():
-    update = False
-    while True:
-        start_parce(update)
-        time.sleep(604800)
-        update = True
-
-
-async def start_bot():
-    executor.start_polling(dp)
+async def create_db(update):
+    print("Начинаем обновлять базу")
+    start_parce(update)
 
 
 if __name__ == "__main__":
     session = start_session()
     executor.start_polling(dp)
-    ioloop = asyncio.get_event_loop()
-    tasks = [ioloop.create_task(parce())]
-    wait_tasks = asyncio.wait(tasks)
-    ioloop.run_until_complete(wait_tasks)
+
+    # ioloop = asyncio.get_event_loop()
+    # tasks = [ioloop.create_task(executor.start_polling(dp)), ioloop.create_task(parce())]
+    # wait_tasks = asyncio.wait(tasks)
+    # ioloop.run_until_complete(wait_tasks)
 
 
