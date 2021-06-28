@@ -9,7 +9,7 @@ def check_phone(message):
 
 
 def check_name(message):
-    reg_exp = '\w+\s*\w*'
-    if re.findall(reg_exp, message):
+    reg_exp = r'\w+\s*\w*'
+    if re.findall(reg_exp, message) and message[0] != '/':
         return True
     return False

@@ -1,4 +1,3 @@
-import time
 import asyncio
 from aiogram import Bot, Dispatcher, executor, types
 
@@ -40,7 +39,8 @@ async def prepare_message(state, callback_query):
 
 async def set_default_commands(dp):
     await dp.bot.set_my_commands([
-        types.BotCommand("start", "Запустить бота")])
+        types.BotCommand("start", "Запустить бота")
+    ])
 
 
 @dp.message_handler(commands=['create_db', 'update_db'])
@@ -242,6 +242,11 @@ async def show_products_command(callback_query: types.CallbackQuery):
                                      reply_markup=poll_keyboard)
     set_last_message(session, user, message["message_id"])
     await bot.delete_message(user.user_id, last_msg)
+
+
+@dp.message_handler()
+async def delete_message(message: types.Message):
+    await bot.delete_message(message.from_user.id, message.message_id)
 
 
 async def create_db(update):
