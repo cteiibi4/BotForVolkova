@@ -128,6 +128,8 @@ async def command(callback_query: types.CallbackQuery):
     poll_keyboard = types.InlineKeyboardMarkup(resize_keyboard=True)
     video = COMMANDS[command].get('video', None)
     text = COMMANDS[command].get('text', None)
+    file = COMMANDS[command].get('file', None)
+    file_id = COMMANDS[command].get('file_id', None)
     for com in COMMANDS[command]['commands']:
         if com in COMMANDS:
             poll_keyboard.add(types.InlineKeyboardButton(text=COMMANDS[com]['name'], callback_data=f'{com}'))
@@ -138,6 +140,12 @@ async def command(callback_query: types.CallbackQuery):
     if video:
         message = await bot.send_message(chat_id=user_id, text=f"{text}\n{video}{video}",
                                        reply_markup=poll_keyboard)
+    elif file:
+        doc = open(file, 'rb')
+        message = await bot.send_document(chat_id=user_id, document=doc, caption=text,
+                                         reply_markup=poll_keyboard)
+        COMMANDS[command]['file_id'] = message["message_id"]
+        doc.close()
     else:
         message = await bot.send_message(chat_id=user_id, text=f"{text}", reply_markup=poll_keyboard)
     set_last_message(session, user, message["message_id"])
@@ -233,8 +241,9 @@ async def start_bot():
 
 if __name__ == "__main__":
     session = start_session()
+    executor.start_polling(dp)
     ioloop = asyncio.get_event_loop()
-    tasks = [ioloop.create_task(parce()), ioloop.create_task(start_bot())]
+    tasks = [ioloop.create_task(parce())]
     wait_tasks = asyncio.wait(tasks)
     ioloop.run_until_complete(wait_tasks)
 
